@@ -1,53 +1,14 @@
------
-
------
-
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>たのしゅぎょ！八ヶ岳</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#e8e0cc;font-family:sans-serif;}
-#ns{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-.nbox{background:#f5f0e6;border-top:3px solid #385830;padding:32px 24px;width:100%;max-width:340px;}
-.ntitle{font-size:20px;font-weight:bold;color:#1c1810;margin-bottom:6px;}
-.nsub{font-size:13px;color:#78705a;line-height:1.7;margin-bottom:20px;}
-#ni{width:100%;border:none;border-bottom:2px solid #385830;background:transparent;font-size:20px;padding:8px 0;outline:none;margin-bottom:20px;font-family:sans-serif;color:#1c1810;}
-#nb{width:100%;padding:16px;background:#385830;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:sans-serif;}
-#ms{display:none;max-width:480px;margin:0 auto;background:#f5f0e6;min-height:100vh;}
-</style>
 </head>
-<body>
-
-<div id="ns">
-  <div class="nbox">
-    <div class="ntitle">旅人として登録する</div>
-    <div class="nsub">名前を入れてください。<br>仲間の画面に表示されます。</div>
-    <input id="ni" type="text" placeholder="あなたの名前" maxlength="8">
-    <button id="nb">旅を始める →</button>
-  </div>
-</div>
-
-<div id="ms">
-  <p id="test" style="padding:20px;font-size:18px;">ここに画面が出ます</p>
-</div>
-
-<script>
-document.getElementById("nb").addEventListener("click", function() {
-  var v = document.getElementById("ni").value.trim();
-  if (!v) {
-    alert("名前を入力してください");
-    return;
-  }
-  document.getElementById("ns").style.display = "none";
-  document.getElementById("ms").style.display = "block";
-  document.getElementById("test").textContent = "こんにちは、" + v + "さん！";
-});
-</script>
-
+<body style="background:#e8e0cc;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;">
+<form action="" method="get" style="background:#f5f0e6;padding:32px;max-width:340px;width:100%;border-top:3px solid #385830;">
+  <div style="font-size:20px;font-weight:bold;margin-bottom:16px;">旅人として登録する</div>
+  <input name="name" type="text" placeholder="あなたの名前" style="width:100%;font-size:20px;padding:8px 0;border:none;border-bottom:2px solid #385830;background:transparent;outline:none;margin-bottom:20px;">
+  <button type="submit" style="width:100%;padding:16px;background:#385830;color:#fff;border:none;font-size:14px;">旅を始める →</button>
+</form>
 </body>
 </html>
