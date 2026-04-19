@@ -1,14 +1,209 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>たのしゅぎょ！八ヶ岳</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#e8e0cc;font-family:sans-serif;min-height:100vh;}
+#wrap{max-width:480px;margin:0 auto;background:#f5f0e6;min-height:100vh;}
+.hd{background:#385830;padding:14px 20px;display:flex;justify-content:space-between;align-items:flex-end;position:sticky;top:0;z-index:9;}
+.hd-t{font-size:17px;font-weight:bold;color:#fff;}
+.hd-s{font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:2px;margin-bottom:2px;}
+.hd-r{text-align:right;font-size:11px;color:rgba(255,255,255,0.65);}
+.tabs{display:flex;background:#ede5d0;border-bottom:1px solid rgba(0,0,0,0.1);}
+.tab{flex:1;padding:10px 4px 8px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:sans-serif;text-decoration:none;display:block;text-align:center;}
+.tab.on{background:#f5f0e6;border-bottom-color:#385830;}
+.tab .dn{font-size:14px;font-weight:bold;color:#aaa;}
+.tab .dl{font-size:9px;color:#aaa;letter-spacing:1px;}
+.tab.on .dn{color:#385830;}
+.tab.on .dl{color:#7a9a6c;}
+.sec{padding:18px 20px;border-bottom:1px solid rgba(0,0,0,0.08);}
+.warm{background:#ede5d0;}
+.lbl{font-size:10px;color:#aaa;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.sr{display:flex;gap:10px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);}
+.sr:last-child{border:none;}
+.st{font-size:11px;color:#aaa;width:42px;flex-shrink:0;}
+.sx{font-size:12px;color:#46402e;line-height:1.5;}
+.qt{font-size:20px;font-weight:bold;color:#1c1810;line-height:1.8;margin-bottom:16px;white-space:pre-line;}
+.ans{width:100%;border:none;border-bottom:1px solid rgba(0,0,0,0.12);background:transparent;font-family:sans-serif;font-size:14px;color:#1c1810;line-height:1.8;resize:none;padding:4px 0 8px;outline:none;margin-bottom:14px;}
+.fr{display:flex;gap:6px;margin-bottom:14px;}
+.fb{flex:1;padding:10px 4px;background:transparent;border:1px solid rgba(0,0,0,0.12);font-size:12px;font-family:sans-serif;color:#aaa;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;}
+.fb .fi{font-size:20px;}
+.fb.s1{border-color:#385830;background:rgba(56,88,48,0.06);color:#385830;}
+.fb.s2{border-color:#786030;background:rgba(120,96,48,0.05);color:#786030;}
+.fb.s3{border-color:#686258;background:rgba(104,98,88,0.05);color:#686258;}
+.rb{width:100%;padding:14px;background:#385830;border:none;color:#fff;font-family:sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;}
+.mh{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.ml{font-size:10px;color:#aaa;letter-spacing:2px;text-transform:uppercase;}
+.mr{flex:1;height:1px;background:rgba(0,0,0,0.1);}
+.ub{border:1px solid rgba(0,0,0,0.12);background:transparent;padding:4px 12px;font-size:11px;color:#aaa;font-family:sans-serif;cursor:pointer;}
+.wb{background:#ede5d0;border:1px solid rgba(0,0,0,0.1);padding:12px;margin-bottom:14px;}
+.wi{display:flex;gap:6px;}
+.wy{display:flex;flex-direction:column;justify-content:space-between;font-size:14px;padding:2px 0;}
+.mc{padding:12px 14px;background:#ede5d0;border:1px solid rgba(0,0,0,0.1);margin-bottom:7px;}
+.mc.me{background:rgba(56,88,48,0.05);border-color:#c2d2b6;border-left:2px solid #385830;}
+.mt{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.mi{width:26px;height:26px;border-radius:50%;border:1px solid #aaa;display:flex;align-items:center;justify-content:center;font-size:13px;color:#46402e;flex-shrink:0;}
+.mn{font-size:12px;color:#46402e;flex:1;}
+.mf{font-size:18px;}
+.ma{font-size:13px;color:#78705a;line-height:1.7;padding-left:34px;font-style:italic;}
+.mw{font-size:11px;color:#ccc;padding-left:34px;font-style:italic;}
+.sv{padding:20px;background:#ede5d0;border-top:1px solid rgba(0,0,0,0.08);}
+.ft{padding:18px 20px 40px;display:flex;justify-content:space-between;align-items:center;}
+</style>
 </head>
-<body style="background:#e8e0cc;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;">
-<form action="" method="get" style="background:#f5f0e6;padding:32px;max-width:340px;width:100%;border-top:3px solid #385830;">
-  <div style="font-size:20px;font-weight:bold;margin-bottom:16px;">旅人として登録する</div>
-  <input name="name" type="text" placeholder="あなたの名前" style="width:100%;font-size:20px;padding:8px 0;border:none;border-bottom:2px solid #385830;background:transparent;outline:none;margin-bottom:20px;">
-  <button type="submit" style="width:100%;padding:16px;background:#385830;color:#fff;border:none;font-size:14px;">旅を始める →</button>
-</form>
+<body>
+<script>
+// URLから名前と日付を取得
+function getParam(k){var u=new URL(location.href);return u.searchParams.get(k)||"";}
+var nm=getParam("nm")||localStorage.getItem("yt_nm")||"";
+var day=parseInt(getParam("d"))||0;
+var feels=JSON.parse(localStorage.getItem("yt_feels")||"{}");
+var answers=JSON.parse(localStorage.getItem("yt_ans")||"{}");
+
+var GAS=“https://script.google.com/macros/s/AKfycbxn629yTdMKUb_JkSyuaB_86NwwpDKgBTfWWKCkv_sHQQjvsaozyW5hzQiq2_YwMmLJ/exec”;
+var PAL=[”#385830”,”#786030”,”#3c5668”,”#8a503c”,”#506428”,”#644870”,”#3c6e5a”,”#784050”];
+var FACE={great:“😊”,soso:“🙂”,hmm:“😐”};
+var FY={great:8,soso:36,hmm:64};
+var cm={},ci=0;
+function gc(n){if(!cm[n]&&cm[n]!==0)cm[n]=ci++%PAL.length;return PAL[cm[n]];}
+
+var D={
+1:{date:“4月19日（日）”,badge:“Day 1”,q:“この旅の中で、\n何を見つけたい？”,
+sch:[[“12:06”,“JR茅野駅 集合”],[“12:15”,“さくらさく ランチ（馬肉・須田先生と）”],[“午後”,“茅野市周辺 視察”],[“15:30”,“白樺湖池の平ホテル チェックイン”],[“18:00”,“矢島社長と会食MTG”]]},
+2:{date:“4月20日（月）”,badge:“Day 2”,q:“この旅の中で、ちょっと気づいたことが\nあるとしたら、それは何？”,
+sch:[[“9:00”,“御諏訪太鼓 演奏体験（山本麻琴さんと）”],[“10:00”,“温泉施設 訪問（栗山友理さんと）”],[“11:00”,“e-bike で白樺湖一周（Hygge）”],[“13:00”,“蓼科湖周辺 ランチ”],[“14:00”,“8peaks brewery 見学”],[“15:15”,“古過庵 — 縄文ブッシュクラフト体験”],[“16:10”,“笹原集落 — ガイドのお話”],[“20:00”,“8peaks family 交流会（PianoMan）”]]},
+3:{date:“4月21日（火）”,badge:“Day 3”,q:“この旅は、これからの日々に\nどんな変化をもたらしてくれそう？”,
+sch:[[“9:00”,”「森と、ピアノと、」訪問・ミニ演奏会”],[“10:30”,“野口果樹園 訪問”],[“13:00”,“ボードゲーム施設 GAW 見学”],[“15:00”,“ヤマファーム 見学”],[“16:00”,“茅野駅 解散”]]}
+};
+
+// 今日の日付で初期タブ
+if(!day){var td=new Date().getDate();day=td===20?2:td===21?3:1;}
+
+// 名前がなければ入力フォームを表示
+if(!nm){
+document.write(’<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#e8e0cc;">’+
+‘<form method="get" style="background:#f5f0e6;border-top:3px solid #385830;padding:32px 24px;width:100%;max-width:340px;">’+
+‘<div style="font-size:20px;font-weight:bold;color:#1c1810;margin-bottom:6px;">旅人として登録する</div>’+
+‘<div style="font-size:13px;color:#78705a;line-height:1.7;margin-bottom:20px;">名前を入れてください。<br>仲間の画面に表示されます。</div>’+
+’<input name=“nm” type=“text” placeholder=“あなたの名前” maxlength=“8” required ’+
+‘style=“width:100%;border:none;border-bottom:2px solid #385830;background:transparent;font-size:20px;padding:8px 0;outline:none;margin-bottom:20px;font-family:sans-serif;color:#1c1810;”>’+
+‘<input type="hidden" name="d" value="'+day+'">’+
+‘<button type="submit" style="width:100%;padding:16px;background:#385830;border:none;color:#fff;font-size:14px;font-family:sans-serif;">旅を始める →</button>’+
+‘</form></div>’);
+} else {
+localStorage.setItem(“yt_nm”, nm);
+renderMain();
+}
+
+function renderMain(){
+var d=D[day];
+var sch=d.sch.map(function(x){return’<div class="sr"><span class="st">’+x[0]+’</span><span class="sx">’+x[1]+’</span></div>’;}).join(””);
+var tabs=[1,2,3].map(function(i){
+return’<a href=”?nm=’+encodeURIComponent(nm)+’&d=’+i+’” class=“tab’+(i===day?” on”:””)+’”>’+’<div class="dn">’+(18+i)+’</div><div class="dl">’+i+‘日目</div></a>’;
+}).join(””);
+var feelLinks=[[“great”,“😊”,“いい感じ”,“s1”],[“soso”,“🙂”,“まあまあ”,“s2”],[“hmm”,“😐”,“うーん”,“s3”]].map(function(x){
+var active=feels[day]===x[0];
+return’<a href=”?nm=’+encodeURIComponent(nm)+’&d=’+day+’&feel=’+x[0]+’” class=“fb’+(active?” “+x[3]:””)+’”>’+’<span class="fi">’+x[1]+’</span><span>’+x[2]+’</span></a>’;
+}).join(””);
+var sv=day===3?’<div class="sv"><div class="lbl">Souvenir</div><div style="font-size:17px;font-weight:bold;color:#1c1810;line-height:1.8;margin-bottom:8px;">あなたが「本当にやりたかったこと」は、<br>今もまだ、あなたの中にあるか。</div><div style="font-size:12px;color:#78705a;line-height:1.7;font-style:italic;">この問いに、すぐ答えなくていい。日常に戻ってから、ふとした瞬間に思い出したとき、少しだけ立ち止まってみよう。</div></div>’:””;
+
+document.write(
+‘<div id="wrap">’+
+‘<div class="hd"><div><div class="hd-s">たのしゅぎょ！</div><div class="hd-t">八ヶ岳の旅</div></div>’+
+‘<div class="hd-r">2026年’+d.date+’<br>’+d.badge+’</div></div>’+
+‘<div class="tabs">’+tabs+’</div>’+
+‘<div class="sec"><div class="lbl">Day ‘+day+’</div><div style="font-size:19px;font-weight:bold;color:#1c1810;">’+d.date+’</div></div>’+
+‘<div class="sec warm"><div class="lbl">今日の行程</div>’+sch+’</div>’+
+‘<div class="sec"><div class="lbl">今日の問い</div>’+
+‘<div class="qt">’+d.q+’</div>’+
+‘<form method="get" id="ansform">’+
+‘<input type="hidden" name="nm" value="'+nm+'">’+
+‘<input type="hidden" name="d" value="'+day+'">’+
+‘<input type=“hidden” name=“feel” value=”’+(feels[day]||””)+’”>’+
+‘<textarea name="ans" class="ans" rows="3" placeholder="思ったことを、そのまま…">’+(answers[day]||””)+’</textarea>’+
+‘<div class="lbl">手ごたえ</div>’+
+‘<div class="fr">’+feelLinks+’</div>’+
+‘<button type="submit" class="rb">記録して仲間に届ける</button>’+
+‘</form></div>’+
+‘<div class="sec" id="msec">’+
+‘<div class="mh"><span class="ml">仲間の記録</span><div class="mr"></div>’+
+‘<button class="ub" onclick="loadRows()">更新</button></div>’+
+‘<div id="wave-area"><div class="wb"><div class="lbl">手ごたえの波</div>’+
+‘<div style="text-align:center;padding:12px;font-size:12px;color:#ccc;font-style:italic;">「更新」を押すと仲間の記録が見えます</div></div></div>’+
+‘<div id="cards-area"></div></div>’+
+sv+
+‘<div class="ft"><div style="font-size:11px;color:#aaa;line-height:1.7;font-style:italic;">失敗も後悔も、取り返しのつかないことも、<br>全部持ったまま、旅に出よう。</div>’+
+‘<div style="font-size:14px;font-weight:bold;color:#385830;">たのしゅぎょ！</div></div>’+
+‘</div>’
+);
+}
+
+// URLパラメータから手ごたえ・回答を処理
+var feelParam=getParam(“feel”);
+var ansParam=getParam(“ans”);
+if(feelParam){feels[day]=feelParam;localStorage.setItem(“yt_feels”,JSON.stringify(feels));}
+if(ansParam){answers[day]=ansParam;localStorage.setItem(“yt_ans”,JSON.stringify(answers));}
+
+// 記録送信
+var ansP=getParam(“ans”);
+if(nm && ansP){
+fetch(GAS+”?action=save&day=”+day+”&name=”+encodeURIComponent(nm)+”&feel=”+(feelParam||””)+”&ans=”+encodeURIComponent(ansP),{method:“GET”,mode:“no-cors”});
+}
+
+function loadRows(){
+fetch(GAS+”?action=load&day=”+day,{mode:“cors”})
+.then(function(r){return r.json();})
+.then(function(data){
+if(data.ok){
+document.getElementById(“wave-area”).innerHTML=makeWave(data.rows);
+document.getElementById(“cards-area”).innerHTML=makeCards(data.rows);
+}
+})
+.catch(function(){alert(“取得できませんでした。”);});
+}
+
+function makeWave(r){
+var felt=r.filter(function(x){return x.feel;});
+if(!felt.length)return’<div class="wb"><div class="lbl">手ごたえの波</div><div style="text-align:center;padding:12px;font-size:12px;color:#ccc;font-style:italic;">まだ記録がありません</div></div>’;
+var W=250,H=72,total=felt.length;
+var names=[];felt.forEach(function(x){if(names.indexOf(x.name)<0)names.push(x.name);});
+var paths=””,legend=””;
+[8,36,64].forEach(function(y){paths+=’<line x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" stroke="rgba(0,0,0,0.07)" stroke-dasharray="3,4"/>’;});
+names.forEach(function(n){
+var p=felt.filter(function(x){return x.name===n;});
+var col=gc(n);
+var hx=col.replace(’#’,’’);
+var rr=parseInt(hx.slice(0,2),16),gg=parseInt(hx.slice(2,4),16),bb=parseInt(hx.slice(4,6),16);
+var pts=p.map(function(x){var i=felt.indexOf(x);return[total<=1?W/2:(i/(total-1))*(W-16)+8,FY[x.feel]||36];});
+if(pts.length===1){paths+=’<circle cx="'+pts[0][0]+'" cy="'+pts[0][1]+'" r="5" fill="'+col+'"/>’;}
+else{
+var fl=“M”+pts[0][0]+” “+H+” L”+pts[0][0]+” “+pts[0][1],ln=“M”+pts[0][0]+” “+pts[0][1];
+for(var i=1;i<pts.length;i++){var cx=(pts[i-1][0]+pts[i][0])/2,cy=(pts[i-1][1]+pts[i][1])/2;fl+=” Q”+pts[i-1][0]+” “+pts[i-1][1]+” “+cx+” “+cy;ln+=” Q”+pts[i-1][0]+” “+pts[i-1][1]+” “+cx+” “+cy;}
+fl+=” L”+pts[pts.length-1][0]+” “+pts[pts.length-1][1]+” L”+pts[pts.length-1][0]+” “+H+” Z”;
+ln+=” L”+pts[pts.length-1][0]+” “+pts[pts.length-1][1];
+paths+=’<path d="'+fl+'" fill="rgba('+rr+','+gg+','+bb+',0.12)"/>’;
+paths+=’<path d="'+ln+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>’;
+pts.forEach(function(pt){paths+=’<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="3.5" fill="'+col+'"/>’;});
+}
+legend+=’<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;"><span style="width:8px;height:8px;border-radius:50%;background:'+col+';display:inline-block;"></span><span style="font-size:11px;color:#78705a;">’+n+’</span></span>’;
+});
+return’<div class="wb"><div class="lbl">手ごたえの波</div><div class="wi"><div class="wy"><span>😊</span><span>🙂</span><span>😐</span></div><svg viewBox="0 0 '+W+' '+H+'" style="flex:1;height:'+H+'px;display:block;overflow:visible;">’+paths+’</svg></div><div style="display:flex;justify-content:space-between;padding-left:26px;margin-top:4px;"><span style="font-size:10px;color:#ccc;">早い順</span><span style="font-size:10px;color:#ccc;">最新 →</span></div><div style="margin-top:8px;padding-left:26px;">’+legend+’</div></div>’;
+}
+
+function makeCards(r){
+if(!r.length)return’<div style="text-align:center;padding:16px;font-size:12px;color:#ccc;font-style:italic;">まだ誰も記録していません</div>’;
+var sorted=r.filter(function(x){return x.name===nm;}).concat(r.filter(function(x){return x.name!==nm;}));
+return sorted.map(function(x){
+var isMe=x.name===nm;
+var f=x.feel?FACE[x.feel]:”—”;
+return’<div class=“mc’+(isMe?” me”:””)+’”><div class="mt"><div class="mi" style="border-color:'+gc(x.name)+'">’+x.name.charAt(0)+’</div><span class="mn">’+x.name+’</span>’+(isMe?’<span style="font-size:10px;color:#7a9a6c;">あなた</span>’:’’)+’<span class="mf">’+f+’</span></div>’+(x.ans?’<div class="ma">’+x.ans+’</div>’:’<div class="mw">— 手ごたえのみ記録</div>’)+’</div>’;
+}).join(””);
+}
+</script>
+
 </body>
 </html>
