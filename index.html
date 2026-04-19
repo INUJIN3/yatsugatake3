@@ -81,6 +81,7 @@ var td=new Date().getDate();
 if(td===20){day=2;}else if(td===21){day=3;}
 try{var sf=localStorage.getItem("yt_f");if(sf){feels=JSON.parse(sf);}var sa=localStorage.getItem("yt_a");if(sa){answers=JSON.parse(sa);}}catch(e){}
 goDay(day);
+setTimeout(doLoad,800);
 function goDay(d){
   day=d;
   var dd=D[d];
