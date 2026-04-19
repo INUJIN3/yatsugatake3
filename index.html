@@ -10,10 +10,16 @@
 </div>
 <div id="pg" style="padding:20px;"></div>
 <script>
-function show() {
-  document.getElementById("pg").innerHTML = "関数が動いた！";
+var D = {
+  1: {date:"4月19日", q:"この旅の中で、何を見つけたい？"},
+  2: {date:"4月20日", q:"ちょっと気づいたことは？"},
+  3: {date:"4月21日", q:"どんな変化をもたらしてくれそう？"}
+};
+function show(day) {
+  document.getElementById("pg").innerHTML =
+    "<b>" + D[day].date + "</b><br>" + D[day].q;
 }
-show();
+show(1);
 </script>
 </body>
 </html>
