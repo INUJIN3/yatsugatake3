@@ -6,20 +6,12 @@
 </head>
 <body style="background:#e8e0cc;font-family:sans-serif;">
 <div style="background:#385830;padding:14px 20px;">
-  <div style="font-size:10px;color:rgba(255,255,255,0.5);">たのしゅぎょ！</div>
   <div style="font-size:17px;font-weight:bold;color:#fff;">八ヶ岳の旅</div>
 </div>
-<div style="display:flex;background:#ede5d0;" id="tabs"></div>
 <div id="pg" style="padding:20px;"></div>
 <script>
-var day=1;
-var D={
-  1:{date:"4月19日（日）",q:"この旅の中で、\n何を見つけたい？"},
-  2:{date:"4月20日（月）",q:"この旅の中で、ちょっと気づいたことがあるとしたら、それは何？"},
-  3:{date:"4月21日（火）",q:"この旅は、これからの日々にどんな変化をもたらしてくれそう？"}
-};
-function goDay(d){
-  day=d;
-  var th="";
-  for(var i=1;i<=3;i++){
-    th+='<button onclick="goDay('+i+')" style="flex:1;padding:10px 4px;background:'+(i===d?"#f5f0e6":"none")+';border:none;border-bottom​​​​​​​​​​​​​​​​
+var txt = "今日の問い：この旅の中で、何を見つけたい？";
+document.getElementById("pg").innerHTML = txt;
+</script>
+</body>
+</html>
