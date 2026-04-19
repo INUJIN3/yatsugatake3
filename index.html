@@ -4,22 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="background:#e8e0cc;font-family:sans-serif;">
+<body style="background:#e8e0cc;font-family:sans-serif;margin:0;">
 <div style="background:#385830;padding:14px 20px;">
   <div style="font-size:17px;font-weight:bold;color:#fff;">八ヶ岳の旅</div>
 </div>
+<div id="tabs" style="display:flex;background:#ede5d0;"></div>
 <div id="pg" style="padding:20px;"></div>
 <script>
-var D = {
-  1: {date:"4月19日", q:"この旅の中で、何を見つけたい？"},
-  2: {date:"4月20日", q:"ちょっと気づいたことは？"},
-  3: {date:"4月21日", q:"どんな変化をもたらしてくれそう？"}
+var day=1;
+var D={
+  1:{date:"4月19日（日）",q:"この旅の中で、\n何を見つけたい？"},
+  2:{date:"4月20日（月）",q:"この旅の中で、ちょっと気づいたことが\nあるとしたら、それは何？"},
+  3:{date:"4月21日（火）",q:"この旅は、これからの日々に\nどんな変化をもたらしてくれそう？"}
 };
-function show(day) {
+function goDay(d) {
+  day = d;
+  var th = "";
+  th += '<button onclick="goDay(1)" style="flex:1;padding:10px 4px;background:'+(d==1?"#f5f0e6":"none")+';border:none;border-bottom:2px solid '+(d==1?"#385830":"transparent")+';cursor:pointer;"><div style="font-size:14px;font-weight:bold;color:'+(d==1?"#385830":"#aaa")+'">19</div><div style="font-size:9px;color:#aaa;">1日目</div></button>';
+  th += '<button onclick="goDay(2)" style="flex:1;padding:10px 4px;background:'+(d==2?"#f5f0e6":"none")+';border:none;border-bottom:2px solid '+(d==2?"#385830":"transparent")+';cursor:pointer;"><div style="font-size:14px;font-weight:bold;color:'+(d==2?"#385830":"#aaa")+'">20</div><div style="font-size:9px;color:#aaa;">2日目</div></button>';
+  th += '<button onclick="goDay(3)" style="flex:1;padding:10px 4px;background:'+(d==3?"#f5f0e6":"none")+';border:none;border-bottom:2px solid '+(d==3?"#385830":"transparent")+';cursor:pointer;"><div style="font-size:14px;font-weight:bold;color:'+(d==3?"#385830":"#aaa")+'">21</div><div style="font-size:9px;color:#aaa;">3日目</div></button>';
+  document.getElementById("tabs").innerHTML = th;
   document.getElementById("pg").innerHTML =
-    "<b>" + D[day].date + "</b><br>" + D[day].q;
+    '<div style="font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:10px;">今日の問い</div>' +
+    '<div style="font-size:20px;font-weight:bold;color:#1c1810;line-height:1.8;white-space:pre-line;">' + D[d].q + '</div>';
 }
-show(1);
+goDay(day);
 </script>
 </body>
 </html>
