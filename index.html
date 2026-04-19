@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>たのしゅぎょ！八ヶ岳</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<script>
+// Jekyll対策：このscriptタグより前に何も出力しない
+document.documentElement.style.cssText = "margin:0;padding:0;background:#e8e0cc;min-height:100%;";
+document.body.style.cssText = "margin:0;padding:0;background:#e8e0cc;min-height:100vh;font-family:'Noto Serif JP',serif;";
+</script>
+
+<div id="root"></div>
+
+<script>
+const GAS = "https://script.google.com/macros/s/AKfycbxn629yTdMKUb_JkSyuaB_86NwwpDKgBTfWWKCkv_sHQQjvsaozyW5hzQiq2_YwMmLJ/exec";
+
+// ━━━ 色 ━━━
+const C = {
+  bg: "#e8e0cc",
+  paper: "#f5f0e6",
+  warm: "#ede5d0",
+  forest: "#385830",
+  forestD: "#2a4222",
+  soil: "#786030",
+  soilL: "#a88a52",
+  ink: "#1c1810",
+  inkM: "#46402e",
+  inkS: "#78705a",
+  inkG: "#aaa090",
+  line: "rgba(28,24,16,0.12)",
+};
+
+// ━━━ 問いデータ ━━━
+const DAYS = {
+  1: {
+    title: "八ヶ岳、到着",
+    date: "4月19日（日）",
+    q: "この旅の中で、\n何を見つけたい？",
+    schedule: [
+      ["12:06", "JR茅野駅 集合"],
+      ["12:15", "さくらさく ランチ（馬肉・須田先生と）"],
+      ["午後",  "茅野市周辺 視察"],
+      ["15:30", "白樺湖池の平ホテル チェックイン"],
+      ["18:00", "矢島社長と会食MTG"],
+    ]
+  },
+  2: {
+    title: "深まる一日",
+    date: "4月20日（月）",
+    q: "この旅の中で、ちょっと気づいたことが\nあるとしたら、それは何？",
+    schedule: [
+      ["9:00",  "御諏訪太鼓 演奏体験（山本麻琴さんと）"],
+      ["10:00", "温泉施設 訪問（栗山友理さんと）"],
+      ["11:00", "e-bike で白樺湖一周（Hygge）"],
+      ["13:00", "蓼科湖周辺 ランチ"],
+      ["14:00", "8peaks brewery 見学"],
+      ["15:15", "古過庵 — 縄文ブッシュクラフト体験"],
+      ["16:10", "笹原集落 — ガイドのお話"],
+      ["20:00", "8peaks family 交流会（PianoMan）"],
+    ]
+  },
+  3: {
+    title: "帰路。持ち帰るもの",
+    date: "4月21日（火）",
+    q: "この旅は、これからの日々に\nどんな変化をもたらしてくれそう？",
+    schedule: [
+      ["9:00",  "「森と、ピアノと、」訪問・ミニ演奏会"],
+      ["10:30", "野口果樹園 訪問"],
+      ["13:00", "ボードゲーム施設 GAW 見学"],
+      ["15:00", "ヤマファーム 見学"],
+      ["16:00", "茅野駅 解散"],
+    ]
+  }
+};
+
+const FEEL_LABELS = { great:"😊 いい感じ", soso:"🙂 まあまあ", hmm:"😐 うーん" };
+const FEEL_COLORS = { great: C.forest, soso: C.soil, hmm: "#686258" };
+const PALETTE = ["#385830","#786030","#3c5668","#8a503c","#506428","#644870","#3c6e5a","#784050"];
+
+// ━━━ 状態 ━━━
+let state = {
+  name: localStorage.getItem("yt8_name") || "",
+  day: 1,
+  answers: { 1:"", 2:"", 3:"" },
+  feels: {
+    1: localStorage.getItem("yt8_feel_1") || "",
+    2: localStorage.getItem("yt8_feel_2") || "",
+    3: localStorage.getItem("yt8_feel_3") || "",
+  },
+  rows: { 1:[], 2:[], 3:[] },
+  loading: false,
+  sending: false,
+  toast: "",
+  colorMap: {},
+  colorIdx: 0,
+};
+
+// 今日の日付から初期タブ
+const today = new Date().getDate();
+if (today === 20) state.day = 2;
+else if (today === 21) state.day = 3;
+
+// ━━━ ユーティリティ ━━━
+function getColor(name) {
+  if (state.colorMap[name] === undefined) {
+    state.colorMap[name] = state.colorIdx++ % PALETTE.length;
+  }
+  return PALETTE[state.colorMap[name]];
+}
+
+function showToast(msg) {
+  state.toast = msg;
+  render();
+  setTimeout(() => { state.toast = ""; render(); }, 2400);
+}
+
+// ━━━ GAS通信 ━━━
+async function loadDay(day) {
+  state.loading = true; render();
+  try {
+    const res = await fetch(`${GAS}?action=load&day=${day}`, { mode:"cors" });
+    const data = await res.json();
+    if (data.ok) { state.rows[day] = data.rows; }
+  } catch(e) {
+    showToast("取得できませんでした。もう一度「更新」を押してください。");
+  }
+  state.loading = false; render();
+}
+
+async function saveRecord() {
+  const day = state.day;
+  const txt = state.answers[day];
+  const feel = state.feels[day];
+  if (!txt && !feel) { showToast("一言か手ごたえを入力してください。"); return; }
+  state.sending = true; render();
+  try {
+    const url = `${GAS}?action=save&day=${day}&name=${encodeURIComponent(state.name)}&feel=${feel}&ans=${encodeURIComponent(txt)}`;
+    await fetch(url, { method:"GET", mode:"no-cors" });
+    localStorage.setItem(`yt8_feel_${day}`, feel);
+    showToast("仲間に届いた。");
+    setTimeout(() => loadDay(day), 1200);
+  } catch(e) {
+    showToast("送信できませんでした。");
+  }
+  state.sending = false; render();
+}
+
+// ━━━ 波SVG ━━━
+function makeWaveSVG(rows) {
+  const felt = rows.filter(r => r.feel);
+  if (!felt.length) return `<div style="text-align:center;padding:14px;color:${C.inkG};font-size:12px;font-style:italic;">記録が届くとここに波が現れます</div>`;
+
+  const W = 260, H = 72;
+  const FEEL_Y = { great:8, soso:36, hmm:64 };
+  const names = [...new Set(felt.map(r=>r.name))];
+  const total = felt.length;
+
+  let svgPaths = "";
+  let legend = "";
+
+  names.forEach(name => {
+    const person = felt.filter(r=>r.name===name);
+    const color = getColor(name);
+    const pts = person.map(r => {
+      const i = felt.indexOf(r);
+      const x = total<=1 ? W/2 : (i/(total-1))*(W-16)+8;
+      return [x, FEEL_Y[r.feel]??36];
+    });
+
+    if (pts.length === 1) {
+      svgPaths += `<circle cx="${pts[0][0]}" cy="${pts[0][1]}" r="5" fill="${color}"/>`;
+    } else {
+      let fill = `M${pts[0][0]} ${H} L${pts[0][0]} ${pts[0][1]}`;
+      let line = `M${pts[0][0]} ${pts[0][1]}`;
+      for (let i=1; i<pts.length; i++) {
+        const cx = (pts[i-1][0]+pts[i][0])/2;
+        const cy = (pts[i-1][1]+pts[i][1])/2;
+        fill += ` Q${pts[i-1][0]} ${pts[i-1][1]} ${cx} ${cy}`;
+        line += ` Q${pts[i-1][0]} ${pts[i-1][1]} ${cx} ${cy}`;
+      }
+      fill += ` L${pts[pts.length-1][0]} ${pts[pts.length-1][1]} L${pts[pts.length-1][0]} ${H} Z`;
+      line += ` L${pts[pts.length-1][0]} ${pts[pts.length-1][1]}`;
+
+      // 色をRGBAに変換（透過塗り）
+      const hex = color.replace('#','');
+      const r=parseInt(hex.slice(0,2),16), g=parseInt(hex.slice(2,4),16), b=parseInt(hex.slice(4,6),16);
+      svgPaths += `<path d="${fill}" fill="rgba(${r},${g},${b},0.12)"/>`;
+      svgPaths += `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+      pts.forEach(p => { svgPaths += `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${color}"/>`; });
+    }
+
+    legend += `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:${color};display:inline-block;"></span>
+      <span style="font-size:11px;color:${C.inkS};">${name}</span>
+    </span>`;
+  });
+
+  // グリッド線
+  const grids = [8,36,64].map(y =>
+    `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="rgba(28,24,16,0.07)" stroke-dasharray="3,4"/>`
+  ).join('');
+
+  return `
+    <div style="background:${C.warm};border:1px solid ${C.line};padding:12px;margin-bottom:16px;">
+      <div style="font-size:10px;color:${C.inkG};letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;">手ごたえの波</div>
+      <div style="display:flex;align-items:stretch;gap:6px;">
+        <div style="display:flex;flex-direction:column;justify-content:space-between;font-size:14px;padding:2px 0;">
+          <span>😊</span><span>🙂</span><span>😐</span>
+        </div>
+        <svg viewBox="0 0 ${W} ${H}" style="flex:1;height:${H}px;display:block;overflow:visible;">
+          ${grids}${svgPaths}
+        </svg>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;padding-left:28px;">
+        <span style="font-size:10px;color:${C.inkG};font-style:italic;">早い順</span>
+        <span style="font-size:10px;color:${C.inkG};font-style:italic;">最新 →</span>
+      </div>
+      <div style="margin-top:8px;padding-left:28px;">${legend}</div>
+    </div>`;
+}
+
+// ━━━ HTML生成 ━━━
+function render() {
+  const root = document.getElementById("root");
+  if (!root) return;
+
+  // 名前未入力
+  if (!state.name) {
+    root.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:${C.bg};">
+        <div style="background:${C.paper};border-top:3px solid ${C.forest};padding:32px 28px;width:100%;max-width:340px;box-shadow:0 8px 32px rgba(28,24,16,0.15);">
+          <div style="font-size:20px;font-weight:700;color:${C.ink};margin-bottom:6px;">旅人として登録する</div>
+          <div style="font-size:13px;color:${C.inkS};line-height:1.7;margin-bottom:20px;">名前を入れてください。<br>仲間の画面に表示されます。</div>
+          <input id="name-input" type="text" placeholder="あなたの名前" maxlength="8"
+            style="width:100%;border:none;border-bottom:1px solid ${C.line};background:transparent;color:${C.ink};font-family:inherit;font-size:20px;padding:6px 0 10px;outline:none;margin-bottom:20px;box-sizing:border-box;"
+            value="" />
+          <button onclick="doSetName()"
+            style="width:100%;padding:14px;background:${C.forest};border:none;color:white;font-family:inherit;font-size:13px;letter-spacing:0.2em;cursor:pointer;border-radius:0;">
+            旅を始める →
+          </button>
+        </div>
+      </div>`;
+    const inp = document.getElementById("name-input");
+    if (inp) {
+      inp.focus();
+      inp.addEventListener("keydown", e => { if (e.key==="Enter") doSetName(); });
+    }
+    return;
+  }
+
+  const day = state.day;
+  const d = DAYS[day];
+  const rows = state.rows[day] || [];
+
+  // 行程HTML
+  const scheduleHTML = d.schedule.map(([time, text]) => `
+    <div style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid ${C.line};">
+      <span style="font-size:11px;color:${C.inkG};width:44px;flex-shrink:0;padding-top:2px;">${time}</span>
+      <span style="font-size:12px;color:${C.inkM};line-height:1.6;">${text}</span>
+    </div>`).join('');
+
+  // 手ごたえボタン
+  const feelBtns = Object.entries(FEEL_LABELS).map(([type, label]) => {
+    const active = state.feels[day] === type;
+    return `<button onclick="doFeel('${type}')"
+      style="flex:1;padding:10px 4px;border:1px solid ${active ? FEEL_COLORS[type] : C.line};background:${active ? `rgba(56,88,48,0.06)` : 'transparent'};cursor:pointer;font-size:13px;font-family:inherit;color:${active ? FEEL_COLORS[type] : C.inkG};">
+      ${label}
+    </button>`;
+  }).join('');
+
+  // 仲間カード
+  const sorted = [...rows.filter(r=>r.name===state.name), ...rows.filter(r=>r.name!==state.name)];
+  const cardsHTML = sorted.length === 0
+    ? `<div style="text-align:center;padding:16px;font-size:12px;color:${C.inkG};font-style:italic;">まだ誰も記録していません。最初の一人になろう。</div>`
+    : sorted.map(r => {
+        const isMe = r.name === state.name;
+        const feel = r.feel ? FEEL_LABELS[r.feel]?.split(' ')[0] : "—";
+        return `
+          <div style="padding:12px 14px;background:${isMe?'rgba(56,88,48,0.05)':C.warm};border:1px solid ${isMe?'#c2d2b6':C.line};border-left:${isMe?`2px solid ${C.forest}`:`1px solid ${C.line}`};margin-bottom:7px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <div style="width:26px;height:26px;border-radius:50%;border:1px solid ${getColor(r.name)};display:flex;align-items:center;justify-content:center;font-size:13px;color:${C.inkM};flex-shrink:0;">${r.name.charAt(0)}</div>
+              <span style="font-size:12px;color:${C.inkM};flex:1;">${r.name}</span>
+              ${isMe ? `<span style="font-size:10px;color:#7a9a6c;">あなた</span>` : ''}
+              <span style="font-size:18px;">${feel}</span>
+            </div>
+            ${r.ans
+              ? `<div style="font-size:13px;color:${C.inkS};line-height:1.75;padding-left:36px;font-style:italic;">${r.ans}</div>`
+              : `<div style="font-size:11px;color:${C.inkG};padding-left:36px;font-style:italic;">— 手ごたえのみ記録</div>`}
+          </div>`;
+      }).join('');
+
+  // タブ
+  const tabsHTML = [1,2,3].map(i => `
+    <button onclick="doDay(${i})"
+      style="flex:1;padding:9px 4px 7px;background:${day===i?C.paper:'transparent'};border:none;border-bottom:${day===i?`2px solid ${C.forest}`:'2px solid transparent'};cursor:pointer;font-family:inherit;">
+      <div style="font-size:14px;font-weight:700;color:${day===i?C.forest:C.inkG};">${18+i}</div>
+      <div style="font-size:9px;color:${day===i?'#7a9a6c':C.inkG};letter-spacing:0.06em;">${i}日目</div>
+    </button>`).join('');
+
+  // お土産（3日目のみ）
+  const souvenirHTML = day===3 ? `
+    <div style="padding:22px 24px;background:${C.warm};border-top:1px solid ${C.line};">
+      <div style="font-size:10px;color:${C.inkG};letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px;">Souvenir</div>
+      <div style="font-size:18px;font-weight:700;color:${C.ink};line-height:1.8;margin-bottom:10px;">あなたが「本当にやりたかったこと」は、<br>今もまだ、あなたの中にあるか。</div>
+      <div style="font-size:12px;color:${C.inkS};line-height:1.8;font-style:italic;">この問いに、すぐ答えなくていい。<br>日常に戻ってから、ふとした瞬間に思い出したとき、<br>少しだけ立ち止まってみよう。</div>
+    </div>` : '';
+
+  root.innerHTML = `
+    <div style="max-width:480px;margin:0 auto;background:${C.paper};min-height:100vh;box-shadow:0 0 40px rgba(28,24,16,0.12);">
+
+      <!-- ヘッダー -->
+      <div style="background:${C.forest};padding:13px 22px 11px;display:flex;justify-content:space-between;align-items:flex-end;position:sticky;top:0;z-index:50;">
+        <div>
+          <div style="font-size:10px;color:rgba(244,239,228,0.5);letter-spacing:0.2em;margin-bottom:2px;">たのしゅぎょ！</div>
+          <div style="font-size:17px;font-weight:700;color:white;letter-spacing:0.06em;">八ヶ岳の旅</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:rgba(244,239,228,0.6);margin-bottom:2px;">2026年${d.date}</div>
+          <div style="font-size:11px;color:rgba(244,239,228,0.8);">Day ${day}</div>
+        </div>
+      </div>
+
+      <!-- タブ -->
+      <div style="display:flex;border-bottom:1px solid ${C.line};background:${C.warm};">
+        ${tabsHTML}
+      </div>
+
+      <!-- 日のヘッダー -->
+      <div style="padding:20px 24px 14px;border-bottom:1px solid ${C.line};">
+        <div style="font-size:10px;color:${C.inkG};letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px;">Day ${day}</div>
+        <div style="font-size:20px;font-weight:700;color:${C.ink};margin-bottom:2px;">${d.title}</div>
+        <div style="font-size:11px;color:${C.inkG};font-style:italic;">2026年${d.date}</div>
+      </div>
+
+      <!-- 行程 -->
+      <div style="padding:14px 24px;background:${C.warm};border-bottom:1px solid ${C.line};">
+        <div style="font-size:10px;color:${C.inkG};letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;">今日の行程</div>
+        ${scheduleHTML}
+      </div>
+
+      <!-- 問い -->
+      <div style="padding:22px 24px 0;">
+        <div style="font-size:10px;color:${C.inkG};letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px;">今日の問い</div>
+        <div style="font-size:20px;font-weight:700;color:${C.ink};line-height:1.85;margin-bottom:18px;white-space:pre-line;">${d.q}</div>
+
+        <textarea id="ans-input" rows="3" placeholder="思ったことを、そのまま…"
+          style="width:100%;border:none;border-bottom:1px solid ${C.line};background:transparent;color:${C.ink};font-family:inherit;font-size:14px;line-height:1.9;resize:none;padding:4px 0 8px;outline:none;margin-bottom:16px;box-sizing:border-box;"
+          oninput="doInput(this.value)">${state.answers[day]}</textarea>
+
+```
+    <div style="font-size:10px;color:${C.inkG};letter-spacing:0.15em;margin-bottom:8px;">手ごたえ</div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;">${feelBtns}</div>
+
+    <button onclick="saveRecord()"
+      style="width:100%;padding:14px;background:${state.sending?C.warm:C.forest};border:none;color:${state.sending?C.inkG:'white'};font-family:inherit;font-size:13px;letter-spacing:0.2em;cursor:${state.sending?'default':'pointer'};">
+      ${state.sending ? "送信中…" : "記録して仲間に届ける"}
+    </button>
+  </div>
+
+  <!-- 仲間の記録 -->
+  <div style="padding:22px 24px 20px;border-top:1px solid ${C.line};margin-top:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <span style="font-size:10px;color:${C.inkG};letter-spacing:0.2em;text-transform:uppercase;">仲間の記録</span>
+      <div style="flex:1;height:1px;background:${C.line};"></div>
+      <button onclick="loadDay(${day})"
+        style="border:1px solid ${C.line};background:transparent;padding:4px 12px;cursor:pointer;font-family:inherit;font-size:11px;color:${C.inkG};">
+        ${state.loading ? "…" : "更新"}
+      </button>
+      ${rows.length > 0 ? `<span style="font-size:11px;color:${C.inkG};">${rows.length}人</span>` : ''}
+    </div>
+
+    ${makeWaveSVG(rows)}
+    ${cardsHTML}
+  </div>
+
+  ${souvenirHTML}
+
+  <!-- フッター -->
+  <div style="padding:20px 24px 40px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-size:11px;color:${C.inkG};line-height:1.7;font-style:italic;">失敗も後悔も、取り返しのつかないことも、<br>全部持ったまま、旅に出よう。</div>
+    <div style="font-size:14px;font-weight:700;color:${C.forest};">たのしゅぎょ！</div>
+  </div>
+</div>
+
+<!-- トースト -->
+${state.toast ? `
+<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(28,24,16,0.3);z-index:200;">
+  <div style="background:${C.paper};border-top:2px solid ${C.forest};padding:20px 32px;text-align:center;box-shadow:0 8px 32px rgba(28,24,16,0.2);max-width:260px;">
+    <div style="font-size:10px;color:${C.forest};letter-spacing:0.25em;text-transform:uppercase;margin-bottom:8px;">Recorded</div>
+    <div style="font-size:14px;color:${C.ink};line-height:1.8;">${state.toast}</div>
+  </div>
+</div>` : ''}
+```
+
+`;
+
+// textarea の値を再セット（innerHTML後にリセットされるため）
+const ta = document.getElementById(“ans-input”);
+if (ta) {
+ta.value = state.answers[day];
+ta.addEventListener(“input”, e => { state.answers[day] = e.target.value; });
+}
+}
+
+// ━━━ イベントハンドラ ━━━
+function doSetName() {
+const inp = document.getElementById(“name-input”);
+const n = (inp ? inp.value : “”).trim();
+if (!n) return;
+state.name = n;
+localStorage.setItem(“yt8_name”, n);
+render();
+}
+
+function doDay(d) {
+state.day = d;
+render();
+}
+
+function doFeel(type) {
+state.feels[state.day] = type;
+render();
+}
+
+function doInput(val) {
+state.answers[state.day] = val;
+}
+
+// ━━━ 初期描画 ━━━
+render();
+</script>
+
+</body>
+</html>
