@@ -44,10 +44,13 @@ textarea::placeholder{color:#ccc;}
 .wb{background:#ede5d0;border:1px solid rgba(0,0,0,0.1);padding:12px;margin-bottom:14px;}
 .wi{display:flex;gap:6px;}
 .wy{display:flex;flex-direction:column;justify-content:space-between;font-size:14px;padding:2px 0;}
+.wx{display:flex;justify-content:space-between;padding-left:26px;margin-top:2px;}
+.wx span{font-size:9px;color:#aaa;}
 .mc{padding:12px 14px;background:#ede5d0;border:1px solid rgba(0,0,0,0.1);margin-bottom:7px;}
 .mt{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
 .mi{width:26px;height:26px;border-radius:50%;border:1px solid #aaa;display:flex;align-items:center;justify-content:center;font-size:13px;color:#46402e;flex-shrink:0;}
 .mn{font-size:12px;color:#46402e;flex:1;}
+.md{font-size:10px;color:#aaa;}
 .mf{font-size:18px;}
 .ma{font-size:13px;color:#78705a;line-height:1.7;padding-left:34px;font-style:italic;}
 .mw{font-size:11px;color:#ccc;padding-left:34px;font-style:italic;}
@@ -76,102 +79,197 @@ var D={
   2:{date:"4月20日（月）",badge:"Day 2",q:"この旅の中で、ちょっと気づいたことが\nあるとしたら、それは何？",sch:[["9:00","御諏訪太鼓 演奏体験"],["10:00","温泉施設 訪問"],["11:00","e-bike で白樺湖一周"],["13:00","蓼科湖周辺 ランチ"],["14:00","8peaks brewery 見学"],["15:15","古過庵 縄文ブッシュクラフト"],["16:10","笹原集落"],["20:00","8peaks family 交流会"]]},
   3:{date:"4月21日（火）",badge:"Day 3",q:"この旅は、これからの日々に\nどんな変化をもたらしてくれそう？",sch:[["9:00","森と、ピアノと、訪問"],["10:30","野口果樹園"],["13:00","GAW 見学"],["15:00","ヤマファーム"],["16:00","茅野駅 解散"]]}
 };
-var day=1,feels={},answers={},rows={1:[],2:[],3:[]};
+var day=1,feels={},answers={};
+// 3日分まとめて保持
+var allRows={1:[],2:[],3:[]};
 var td=new Date().getDate();
 if(td===20){day=2;}else if(td===21){day=3;}
 try{var sf=localStorage.getItem("yt_f");if(sf){feels=JSON.parse(sf);}var sa=localStorage.getItem("yt_a");if(sa){answers=JSON.parse(sa);}}catch(e){}
 goDay(day);
-setTimeout(doLoad,800);
+// 起動時に全日分を読み込む
+setTimeout(doLoadAll,800);
+
 function goDay(d){
-  day=d;
-  var dd=D[d];
-  document.getElementById("hdr").innerHTML="2026年"+dd.date+"<br>"+dd.badge;
-  var th="";
-  for(var i=1;i<=3;i++){
-    th+='<button class="tab'+(i===d?" on":"")+'" onclick="goDay('+i+')"><div class="dn">'+(18+i)+'</div><div class="dl">'+i+'日目</div></button>';
-  }
-  document.getElementById("tabs").innerHTML=th;
-  renderPage();
+day=d;
+var dd=D[d];
+document.getElementById(“hdr”).innerHTML=“2026年”+dd.date+”<br>”+dd.badge;
+var th=””;
+for(var i=1;i<=3;i++){
+th+=’<button class=“tab’+(i===d?” on”:””)+’” onclick=“goDay(’+i+’)”><div class="dn">’+(18+i)+’</div><div class="dl">’+i+‘日目</div></button>’;
 }
+document.getElementById(“tabs”).innerHTML=th;
+renderPage();
+}
+
 function renderPage(){
-  var d=D[day];
-  var sch="";
-  for(var i=0;i<d.sch.length;i++){sch+='<div class="sr"><span class="st">'+d.sch[i][0]+'</span><span class="sx">'+d.sch[i][1]+'</span></div>';}
-  var fb="";
-  var flist=[["great","😊","いい感じ","s1"],["soso","🙂","まあまあ","s2"],["hmm","😐","うーん","s3"]];
-  for(var i=0;i<flist.length;i++){
-    var x=flist[i];
-    fb+='<button class="fb'+(feels[day]===x[0]?" "+x[3]:"")+'" onclick="setFeel(\''+x[0]+'\')"><span class="fi">'+x[1]+'</span><span>'+x[2]+'</span></button>';
-  }
-  var sv="";
-  if(day===3){sv='<div class="sv"><div class="lbl">Souvenir</div><div style="font-size:17px;font-weight:bold;color:#1c1810;line-height:1.8;margin-bottom:8px;">あなたが「本当にやりたかったこと」は、今もまだ、あなたの中にあるか。</div><div style="font-size:12px;color:#78705a;line-height:1.7;font-style:italic;">この問いに、すぐ答えなくていい。日常に戻ってから、少しだけ立ち止まってみよう。</div></div>';}
-  var html='<div class="sec"><div class="lbl">Day '+day+'</div><div style="font-size:19px;font-weight:bold;color:#1c1810;">'+d.date+'</div></div>';
-  html+='<div class="sec warm"><div class="lbl">今日の行程</div>'+sch+'</div>';
-  html+='<div class="sec"><div class="lbl">今日の問い</div><div class="qt">'+d.q+'</div>';
-  html+='<textarea id="ta" rows="3" placeholder="思ったことを、そのまま…"></textarea>';
-  html+='<div class="lbl">手ごたえ</div><div class="fr">'+fb+'</div>';
-  html+='<button class="rb" onclick="doRecord()">記録して仲間に届ける</button></div>';
-  html+='<div class="sec"><div class="mh"><span class="ml">仲間の記録</span><div class="mr"></div><button class="ub" onclick="doLoad()">更新</button>';
-  if(rows[day].length>0){html+='<span style="font-size:11px;color:#aaa;">'+rows[day].length+'人</span>';}
-  html+='</div><div id="wa">'+makeWave(rows[day])+'</div><div id="ca">'+makeCards(rows[day])+'</div></div>';
-  html+=sv;
-  html+='<div class="ft"><div style="font-size:11px;color:#aaa;line-height:1.7;font-style:italic;">失敗も後悔も、取り返しのつかないことも、<br>全部持ったまま、旅に出よう。</div><div style="font-size:14px;font-weight:bold;color:#385830;">たのしゅぎょ！</div></div>';
-  document.getElementById("pg").innerHTML=html;
-  var ta=document.getElementById("ta");
-  ta.value=answers[day]||"";
-  ta.oninput=function(){answers[day]=this.value;try{localStorage.setItem("yt_a",JSON.stringify(answers));}catch(e){}};
+var d=D[day];
+var sch=””;
+for(var i=0;i<d.sch.length;i++){sch+=’<div class="sr"><span class="st">’+d.sch[i][0]+’</span><span class="sx">’+d.sch[i][1]+’</span></div>’;}
+var fb=””;
+var flist=[[“great”,“😊”,“いい感じ”,“s1”],[“soso”,“🙂”,“まあまあ”,“s2”],[“hmm”,“😐”,“うーん”,“s3”]];
+for(var i=0;i<flist.length;i++){
+var x=flist[i];
+fb+=’<button class=“fb’+(feels[day]===x[0]?” “+x[3]:””)+’” onclick=“setFeel('’+x[0]+’')”><span class="fi">’+x[1]+’</span><span>’+x[2]+’</span></button>’;
 }
-function setFeel(t){feels[day]=t;try{localStorage.setItem("yt_f",JSON.stringify(feels));}catch(e){}renderPage();}
+var sv=””;
+if(day===3){sv=’<div class="sv"><div class="lbl">Souvenir</div><div style="font-size:17px;font-weight:bold;color:#1c1810;line-height:1.8;margin-bottom:8px;">あなたが「本当にやりたかったこと」は、今もまだ、あなたの中にあるか。</div><div style="font-size:12px;color:#78705a;line-height:1.7;font-style:italic;">この問いに、すぐ答えなくていい。日常に戻ってから、少しだけ立ち止まってみよう。</div></div>’;}
+var html=’<div class="sec"><div class="lbl">Day ‘+day+’</div><div style="font-size:19px;font-weight:bold;color:#1c1810;">’+d.date+’</div></div>’;
+html+=’<div class="sec warm"><div class="lbl">今日の行程</div>’+sch+’</div>’;
+html+=’<div class="sec"><div class="lbl">今日の問い</div><div class="qt">’+d.q+’</div>’;
+html+=’<textarea id="ta" rows="3" placeholder="思ったことを、そのまま…"></textarea>’;
+html+=’<div class="lbl">手ごたえ</div><div class="fr">’+fb+’</div>’;
+html+=’<button class="rb" onclick="doRecord()">記録して仲間に届ける</button></div>’;
+// 波グラフ：3日分まとめて
+html+=’<div class="sec"><div class="mh"><span class="ml">仲間の記録 — 3日間の波</span><div class="mr"></div><button class="ub" onclick="doLoadAll()">更新</button></div>’;
+html+=’<div id="wa">’+makeWaveAll()+’</div>’;
+// 今日の回答カード
+html+=’<div id="ca">’+makeCards(allRows[day])+’</div></div>’;
+html+=sv;
+html+=’<div class="ft"><div style="font-size:11px;color:#aaa;line-height:1.7;font-style:italic;">失敗も後悔も、取り返しのつかないことも、<br>全部持ったまま、旅に出よう。</div><div style="font-size:14px;font-weight:bold;color:#385830;">たのしゅぎょ！</div></div>’;
+document.getElementById(“pg”).innerHTML=html;
+var ta=document.getElementById(“ta”);
+ta.value=answers[day]||””;
+ta.oninput=function(){answers[day]=this.value;try{localStorage.setItem(“yt_a”,JSON.stringify(answers));}catch(e){}};
+}
+
+function setFeel(t){feels[day]=t;try{localStorage.setItem(“yt_f”,JSON.stringify(feels));}catch(e){}renderPage();}
+
 function doRecord(){
-  var nm=prompt("あなたの名前を入力してください");
-  if(!nm||!nm.trim()){return;}
-  nm=nm.trim();
-  var feel=feels[day]||"";
-  var ans=answers[day]||"";
-  if(!ans&&!feel){alert("一言か手ごたえを入力してください");return;}
-  fetch(GAS+"?action=save&day="+day+"&name="+encodeURIComponent(nm)+"&feel="+feel+"&ans="+encodeURIComponent(ans),{method:"GET",mode:"no-cors"}).then(function(){alert("仲間に届いた！");setTimeout(doLoad,1000);}).catch(function(){alert("送信できませんでした");});
+var nm=prompt(“あなたの名前を入力してください”);
+if(!nm||!nm.trim()){return;}
+nm=nm.trim();
+var feel=feels[day]||””;
+var ans=answers[day]||””;
+if(!ans&&!feel){alert(“一言か手ごたえを入力してください”);return;}
+fetch(GAS+”?action=save&day=”+day+”&name=”+encodeURIComponent(nm)+”&feel=”+feel+”&ans=”+encodeURIComponent(ans),{method:“GET”,mode:“no-cors”})
+.then(function(){alert(“仲間に届いた！”);setTimeout(doLoadAll,1000);})
+.catch(function(){alert(“送信できませんでした”);});
 }
-function doLoad(){
-  fetch(GAS+"?action=load&day="+day,{mode:"cors"}).then(function(r){return r.json();}).then(function(data){if(data.ok){rows[day]=data.rows;document.getElementById("wa").innerHTML=makeWave(data.rows);document.getElementById("ca").innerHTML=makeCards(data.rows);}}).catch(function(){alert("取得できませんでした");});
+
+// 3日分まとめて読み込む
+function doLoadAll(){
+var loaded=0;
+for(var d=1;d<=3;d++){
+(function(dd){
+fetch(GAS+”?action=load&day=”+dd,{mode:“cors”})
+.then(function(r){return r.json();})
+.then(function(data){
+if(data.ok){allRows[dd]=data.rows;}
+loaded++;
+if(loaded===3){
+var wa=document.getElementById(“wa”);
+var ca=document.getElementById(“ca”);
+if(wa){wa.innerHTML=makeWaveAll();}
+if(ca){ca.innerHTML=makeCards(allRows[day]);}
 }
-function makeWave(r){
-  var felt=[];for(var i=0;i<r.length;i++){if(r[i].feel){felt.push(r[i]);}}
-  if(!felt.length){return'<div class="wb"><div class="lbl">手ごたえの波</div><div style="text-align:center;padding:12px;font-size:12px;color:#ccc;font-style:italic;">「更新」を押すと仲間の記録が見えます</div></div>';}
-  var W=250,H=72,total=felt.length;
-  var names=[];for(var i=0;i<felt.length;i++){if(names.indexOf(felt[i].name)<0){names.push(felt[i].name);}}
-  var paths="",legend="";
-  var gy=[8,36,64];for(var i=0;i<gy.length;i++){paths+='<line x1="0" y1="'+gy[i]+'" x2="'+W+'" y2="'+gy[i]+'" stroke="rgba(0,0,0,0.07)" stroke-dasharray="3,4"/>';}
-  for(var ni=0;ni<names.length;ni++){
-    var n=names[ni];
-    var p=[];for(var i=0;i<felt.length;i++){if(felt[i].name===n){p.push(felt[i]);}}
-    var col=gc(n);var hx=col.replace('#','');
-    var rr=parseInt(hx.slice(0,2),16),gg=parseInt(hx.slice(2,4),16),bb=parseInt(hx.slice(4,6),16);
-    var pts=[];
-    for(var i=0;i<p.length;i++){var idx=felt.indexOf(p[i]);var x=total<=1?W/2:(idx/(total-1))*(W-16)+8;pts.push([x,FY[p[i].feel]||36]);}
-    if(pts.length===1){paths+='<circle cx="'+pts[0][0]+'" cy="'+pts[0][1]+'" r="5" fill="'+col+'"/>';}
-    else{
-      var fl="M"+pts[0][0]+" "+H+" L"+pts[0][0]+" "+pts[0][1];
-      var ln="M"+pts[0][0]+" "+pts[0][1];
-      for(var i=1;i<pts.length;i++){var cx=(pts[i-1][0]+pts[i][0])/2,cy=(pts[i-1][1]+pts[i][1])/2;fl+=" Q"+pts[i-1][0]+" "+pts[i-1][1]+" "+cx+" "+cy;ln+=" Q"+pts[i-1][0]+" "+pts[i-1][1]+" "+cx+" "+cy;}
-      fl+=" L"+pts[pts.length-1][0]+" "+pts[pts.length-1][1]+" L"+pts[pts.length-1][0]+" "+H+" Z";
-      ln+=" L"+pts[pts.length-1][0]+" "+pts[pts.length-1][1];
-      paths+='<path d="'+fl+'" fill="rgba('+rr+','+gg+','+bb+',0.12)"/>';
-      paths+='<path d="'+ln+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>';
-      for(var i=0;i<pts.length;i++){paths+='<circle cx="'+pts[i][0]+'" cy="'+pts[i][1]+'" r="3.5" fill="'+col+'"/>';}
-    }
-    legend+='<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;"><span style="width:8px;height:8px;border-radius:50%;background:'+col+';display:inline-block;"></span><span style="font-size:11px;color:#78705a;">'+n+'</span></span>';
-  }
-  return'<div class="wb"><div class="lbl">手ごたえの波</div><div class="wi"><div class="wy"><span>😊</span><span>🙂</span><span>😐</span></div><svg viewBox="0 0 '+W+' '+H+'" style="flex:1;height:'+H+'px;display:block;overflow:visible;">'+paths+'</svg></div><div style="display:flex;justify-content:space-between;padding-left:26px;margin-top:4px;"><span style="font-size:10px;color:#ccc;">早い順</span><span style="font-size:10px;color:#ccc;">最新 →</span></div><div style="margin-top:8px;padding-left:26px;">'+legend+'</div></div>';
+})
+.catch(function(){loaded++;});
+})(d);
 }
+}
+
+// 3日分まとめた波グラフ
+function makeWaveAll(){
+// 全データを day付きで結合、横軸は日付順（19→20→21）
+var all=[];
+for(var d=1;d<=3;d++){
+for(var i=0;i<allRows[d].length;i++){
+if(allRows[d][i].feel){
+all.push({name:allRows[d][i].name,feel:allRows[d][i].feel,day:d});
+}
+}
+}
+if(!all.length){
+return’<div class="wb"><div class="lbl">手ごたえの波 — 3日間</div><div style="text-align:center;padding:12px;font-size:12px;color:#ccc;font-style:italic;">「更新」を押すと仲間の記録が見えます</div></div>’;
+}
+var W=250,H=72;
+// X軸：日ごとに3つの固定ゾーン（0-83, 84-166, 167-250）
+// 同じ日に複数人いる場合は横にずらす
+var dayX={1:42,2:125,3:208}; // 各日の中央X
+// 人ごとにずらすオフセット
+var dayOffset={1:{},2:{},3:{}};
+var dayCount={1:0,2:0,3:0};
+for(var i=0;i<all.length;i++){
+var d=all[i].day;
+var n=all[i].name;
+if(dayOffset[d][n]===undefined){
+dayOffset[d][n]=(dayCount[d]-1)*14;
+dayCount[d]++;
+}
+}
+// 再計算（中央寄せ）
+for(var d=1;d<=3;d++){
+var names=Object.keys(dayOffset[d]);
+var cnt=names.length;
+for(var ni=0;ni<names.length;ni++){
+dayOffset[d][names[ni]]=(ni-(cnt-1)/2)*14;
+}
+}
+
+var names=[];
+for(var i=0;i<all.length;i++){if(names.indexOf(all[i].name)<0){names.push(all[i].name);}}
+
+var paths=””,legend=””;
+// グリッド線
+var gy=[8,36,64];
+for(var i=0;i<gy.length;i++){paths+=’<line x1="0" y1="'+gy[i]+'" x2="'+W+'" y2="'+gy[i]+'" stroke="rgba(0,0,0,0.07)" stroke-dasharray="3,4"/>’;}
+// 日付区切り線
+paths+=’<line x1="83" y1="0" x2="83" y2="'+H+'" stroke="rgba(0,0,0,0.08)"/>’;
+paths+=’<line x1="166" y1="0" x2="166" y2="'+H+'" stroke="rgba(0,0,0,0.08)"/>’;
+
+for(var ni=0;ni<names.length;ni++){
+var n=names[ni];
+var col=gc(n);
+var hx=col.replace(’#’,’’);
+var rr=parseInt(hx.slice(0,2),16),gg=parseInt(hx.slice(2,4),16),bb=parseInt(hx.slice(4,6),16);
+// この人の3日分の点
+var pts=[];
+for(var d=1;d<=3;d++){
+for(var i=0;i<allRows[d].length;i++){
+if(allRows[d][i].name===n&&allRows[d][i].feel){
+var ox=dayOffset[d][n]||0;
+pts.push([dayX[d]+ox, FY[allRows[d][i].feel]||36]);
+break;
+}
+}
+}
+if(!pts.length){continue;}
+if(pts.length===1){
+paths+=’<circle cx="'+pts[0][0]+'" cy="'+pts[0][1]+'" r="5" fill="'+col+'"/>’;
+} else {
+var fl=“M”+pts[0][0]+” “+H+” L”+pts[0][0]+” “+pts[0][1];
+var ln=“M”+pts[0][0]+” “+pts[0][1];
+for(var i=1;i<pts.length;i++){
+var cx=(pts[i-1][0]+pts[i][0])/2,cy=(pts[i-1][1]+pts[i][1])/2;
+fl+=” Q”+pts[i-1][0]+” “+pts[i-1][1]+” “+cx+” “+cy;
+ln+=” Q”+pts[i-1][0]+” “+pts[i-1][1]+” “+cx+” “+cy;
+}
+fl+=” L”+pts[pts.length-1][0]+” “+pts[pts.length-1][1]+” L”+pts[pts.length-1][0]+” “+H+” Z”;
+ln+=” L”+pts[pts.length-1][0]+” “+pts[pts.length-1][1];
+paths+=’<path d="'+fl+'" fill="rgba('+rr+','+gg+','+bb+',0.12)"/>’;
+paths+=’<path d="'+ln+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>’;
+for(var i=0;i<pts.length;i++){paths+=’<circle cx="'+pts[i][0]+'" cy="'+pts[i][1]+'" r="4" fill="'+col+'"/>’;}
+}
+legend+=’<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;"><span style="width:8px;height:8px;border-radius:50%;background:'+col+';display:inline-block;"></span><span style="font-size:11px;color:#78705a;">’+n+’</span></span>’;
+}
+
+return’<div class="wb"><div class="lbl">手ごたえの波 — 3日間</div>’+
+‘<div class="wi"><div class="wy"><span>😊</span><span>🙂</span><span>😐</span></div>’+
+‘<svg viewBox="0 0 '+W+' '+H+'" style="flex:1;height:'+H+'px;display:block;overflow:visible;">’+paths+’</svg></div>’+
+‘<div class="wx"><span>4/19</span><span>4/20</span><span>4/21</span></div>’+
+‘<div style="margin-top:8px;padding-left:26px;">’+legend+’</div></div>’;
+}
+
 function makeCards(r){
-  if(!r.length){return'<div style="text-align:center;padding:16px;font-size:12px;color:#ccc;font-style:italic;">まだ誰も記録していません</div>';}
-  var html="";
-  for(var i=0;i<r.length;i++){
-    var x=r[i];var f=x.feel?FACE[x.feel]:"—";
-    html+='<div class="mc"><div class="mt"><div class="mi" style="border-color:'+gc(x.name)+'">'+x.name.charAt(0)+'</div><span class="mn">'+x.name+'</span><span class="mf">'+f+'</span></div>'+(x.ans?'<div class="ma">'+x.ans+'</div>':'<div class="mw">— 手ごたえのみ記録</div>')+'</div>';
-  }
-  return html;
+if(!r.length){return’<div style="text-align:center;padding:16px;font-size:12px;color:#ccc;font-style:italic;">まだ誰も記録していません</div>’;}
+var html=””;
+for(var i=0;i<r.length;i++){
+var x=r[i];var f=x.feel?FACE[x.feel]:”—”;
+html+=’<div class="mc"><div class="mt"><div class="mi" style="border-color:'+gc(x.name)+'">’+x.name.charAt(0)+’</div><span class="mn">’+x.name+’</span><span class="mf">’+f+’</span></div>’+(x.ans?’<div class="ma">’+x.ans+’</div>’:’<div class="mw">— 手ごたえのみ記録</div>’)+’</div>’;
+}
+return html;
 }
 </script>
+
 </body>
 </html>
