@@ -269,6 +269,13 @@ document.body.appendChild(t);
 setTimeout(()=>t.remove(),2400);
 }
 
+// グローバルに公開
+window.setName=setName;
+window.goDay=goDay;
+window.setFeel=setFeel;
+window.doRecord=doRecord;
+window.doLoad=doLoad;
+
 // 起動
 const sn=localStorage.getItem(“yt9_name”);
 if(sn){name=sn;[1,2,3].forEach(d=>{const f=localStorage.getItem(“yt9_feel_”+d);if(f)feels[d]=f;});document.getElementById(“name-screen”).className=“hidden”;document.getElementById(“main-screen”).className=””;goDay(day);}
