@@ -5,9 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-<div id="pg" style="padding:20px;font-size:18px;">読み込み中...</div>
+<div id="pg" style="padding:20px;"></div>
 <script>
-document.getElementById("pg").innerHTML = "動いた！";
+var day = 1;
+var D = {
+  1: { date:"4月19日", q:"この旅の中で、\n何を見つけたい？" }
+};
+document.getElementById("pg").innerHTML = 
+  "<h2>" + D[day].date + "</h2>" +
+  "<p style='white-space:pre-line;font-size:18px;'>" + D[day].q + "</p>";
 </script>
 </body>
 </html>
