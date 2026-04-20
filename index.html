@@ -11,11 +11,14 @@
 <div id="pg" style="padding:20px;"></div>
 <script>
 var sch1=[["12:06","JR茅野駅"],["12:15","さくらさく ランチ"],["午後","茅野市視察"],["15:30","ホテル チェックイン"],["18:00","会食MTG"]];
-var s="";
-for(var i=0;i<sch1.length;i++){
-  s+="<div>"+sch1[i][0]+" "+sch1[i][1]+"</div>";
+function renderPage(){
+  var s="";
+  for(var i=0;i<sch1.length;i++){
+    s+="<div>"+sch1[i][0]+" "+sch1[i][1]+"</div>";
+  }
+  document.getElementById("pg").innerHTML=s;
 }
-document.getElementById("pg").innerHTML=s;
+renderPage();
 </script>
 </body>
 </html>
