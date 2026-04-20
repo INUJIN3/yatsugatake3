@@ -8,17 +8,27 @@
 <div style="background:#385830;padding:14px 20px;">
   <div style="font-size:17px;font-weight:bold;color:#fff;">八ヶ岳の旅</div>
 </div>
+<div id="tabs" style="display:flex;background:#ede5d0;"></div>
 <div id="pg" style="padding:20px;"></div>
 <script>
 var sch1=[["12:06","JR茅野駅"],["12:15","さくらさく ランチ"],["午後","茅野市視察"],["15:30","ホテル チェックイン"],["18:00","会食MTG"]];
+var day=1;
 function renderPage(){
   var s="";
   for(var i=0;i<sch1.length;i++){
     s+="<div>"+sch1[i][0]+" "+sch1[i][1]+"</div>";
   }
-  document.getElementById("pg").innerHTML=s;
+  document.getElementById("pg").innerHTML="<b>Day "+day+"</b><br>"+s;
 }
-renderPage();
+function goDay(d){
+  day=d;
+  document.getElementById("tabs").innerHTML=
+    '<button onclick="goDay(1)">19</button>'+
+    '<button onclick="goDay(2)">20</button>'+
+    '<button onclick="goDay(3)">21</button>';
+  renderPage();
+}
+goDay(1);
 </script>
 </body>
 </html>
