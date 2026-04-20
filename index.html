@@ -1,34 +1,172 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>たのしゅぎょ！八ヶ岳</title>
 </head>
 <body style="background:#e8e0cc;font-family:sans-serif;margin:0;">
-<div style="background:#385830;padding:14px 20px;">
-  <div style="font-size:17px;font-weight:bold;color:#fff;">八ヶ岳の旅</div>
+
+<div style="background:#385830;padding:14px 20px;position:sticky;top:0;z-index:9;display:flex;justify-content:space-between;align-items:flex-end;">
+  <div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.5);letter-spacing:2px;margin-bottom:2px;">たのしゅぎょ！</div>
+    <div style="font-size:17px;font-weight:bold;color:#fff;">八ヶ岳の旅</div>
+  </div>
+  <div id="hdr" style="text-align:right;font-size:11px;color:rgba(255,255,255,0.65);"></div>
 </div>
-<div id="tabs" style="display:flex;background:#ede5d0;"></div>
-<div id="pg" style="padding:20px;"></div>
+<div id="tabs" style="display:flex;background:#ede5d0;border-bottom:1px solid rgba(0,0,0,0.1);"></div>
+<div id="pg" style="max-width:480px;margin:0 auto;background:#f5f0e6;min-height:100vh;"></div>
+
 <script>
-var sch1=[["12:06","JR茅野駅"],["12:15","さくらさく ランチ"],["午後","茅野市視察"],["15:30","ホテル チェックイン"],["18:00","会食MTG"]];
+var GAS="https://script.google.com/macros/s/AKfycbxn629yTdMKUb_JkSyuaB_86NwwpDKgBTfWWKCkv_sHQQjvsaozyW5hzQiq2_YwMmLJ/exec";
+var PAL=["#385830","#786030","#3c5668","#8a503c","#506428","#644870","#3c6e5a","#784050"];
+var FACE={great:"😊",soso:"🙂",hmm:"😐"};
+var FY={great:8,soso:36,hmm:64};
+var cm={},ci=0;
+function gc(n){if(cm[n]===undefined){cm[n]=ci%8;ci++;}return PAL[cm[n]];}
+
+var sch1=[["12:06","JR茅野駅 集合"],["12:15","さくらさく ランチ"],["午後","茅野市周辺 視察"],["15:30","池の平ホテル チェックイン"],["18:00","矢島社長と会食MTG"]];
+var sch2=[["9:00","御諏訪太鼓 演奏体験"],["10:00","温泉施設 訪問"],["11:00","e-bike 白樺湖一周"],["13:00","蓼科湖 ランチ"],["14:00","8peaks brewery"],["15:15","古過庵 縄文ブッシュクラフト"],["16:10","笹原集落"],["20:00","8peaks family 交流会"]];
+var sch3=[["9:00","森と、ピアノと、"],["10:30","野口果樹園"],["13:00","GAW 見学"],["15:00","ヤマファーム"],["16:00","茅野駅 解散"]];
+var SCH={1:sch1,2:sch2,3:sch3};
+var DATE={1:"4月19日（日）",2:"4月20日（月）",3:"4月21日（火）"};
+var BADGE={1:"Day 1",2:"Day 2",3:"Day 3"};
+var Q={1:"この旅の中で、\n何を見つけたい？",2:"この旅の中で、ちょっと気づいたことが\nあるとしたら、それは何？",3:"この旅は、これからの日々に\nどんな変化をもたらしてくれそう？"};
+
 var day=1;
-function renderPage(){
-  var s="";
-  for(var i=0;i<sch1.length;i++){
-    s+="<div>"+sch1[i][0]+" "+sch1[i][1]+"</div>";
-  }
-  document.getElementById("pg").innerHTML="<b>Day "+day+"</b><br>"+s;
-}
+var feels={};
+var answers={};
+var allRows={1:[],2:[],3:[]};
+
+var td=new Date().getDate();
+if(td===20){day=2;}else if(td===21){day=3;}
+try{var sf=localStorage.getItem("yt_f");if(sf){feels=JSON.parse(sf);}}catch(e){}
+try{var sa=localStorage.getItem("yt_a");if(sa){answers=JSON.parse(sa);}}catch(e){}
+
+goDay(day);
+setTimeout(loadAll,800);
+
 function goDay(d){
   day=d;
+  document.getElementById("hdr").innerHTML="2026年"+DATE[d]+"<br>"+BADGE[d];
   document.getElementById("tabs").innerHTML=
-    '<button onclick="goDay(1)">19</button>'+
-    '<button onclick="goDay(2)">20</button>'+
-    '<button onclick="goDay(3)">21</button>';
+    '<button onclick="goDay(1)" style="flex:1;padding:10px 4px;background:'+(d==1?"#f5f0e6":"none")+';border:none;border-bottom:2px solid '+(d==1?"#385830":"transparent")+';cursor:pointer;font-family:sans-serif;"><div style="font-size:14px;font-weight:bold;color:'+(d==1?"#385830":"#aaa")+';">19</div><div style="font-size:9px;color:'+(d==1?"#7a9a6c":"#aaa")+';">1日目</div></button>'+
+    '<button onclick="goDay(2)" style="flex:1;padding:10px 4px;background:'+(d==2?"#f5f0e6":"none")+';border:none;border-bottom:2px solid '+(d==2?"#385830":"transparent")+';cursor:pointer;font-family:sans-serif;"><div style="font-size:14px;font-weight:bold;color:'+(d==2?"#385830":"#aaa")+';">20</div><div style="font-size:9px;color:'+(d==2?"#7a9a6c":"#aaa")+';">2日目</div></button>'+
+    '<button onclick="goDay(3)" style="flex:1;padding:10px 4px;background:'+(d==3?"#f5f0e6":"none")+';border:none;border-bottom:2px solid '+(d==3?"#385830":"transparent")+';cursor:pointer;font-family:sans-serif;"><div style="font-size:14px;font-weight:bold;color:'+(d==3?"#385830":"#aaa")+';">21</div><div style="font-size:9px;color:'+(d==3?"#7a9a6c":"#aaa")+';">3日目</div></button>';
   renderPage();
 }
-goDay(1);
+
+function renderPage(){
+  var sch=SCH[day];
+  var s="";
+  for(var i=0;i<sch.length;i++){
+    s+="<div style='display:flex;gap:10px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);'><span style='font-size:11px;color:#aaa;width:42px;flex-shrink:0;'>"+sch[i][0]+"</span><span style='font-size:12px;color:#46402e;line-height:1.5;'>"+sch[i][1]+"</span></div>";
+  }
+
+  var f1="<button onclick=\"sf2('great')\" style='flex:1;padding:10px 4px;background:"+(feels[day]=="great"?"rgba(56,88,48,0.06)":"transparent")+";border:1px solid "+(feels[day]=="great"?"#385830":"rgba(0,0,0,0.12)")+";cursor:pointer;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px;'><span style='font-size:20px;'>😊</span><span style='font-size:12px;color:"+(feels[day]=="great"?"#385830":"#aaa")+";'>いい感じ</span></button>";
+  var f2="<button onclick=\"sf2('soso')\" style='flex:1;padding:10px 4px;background:"+(feels[day]=="soso"?"rgba(120,96,48,0.05)":"transparent")+";border:1px solid "+(feels[day]=="soso"?"#786030":"rgba(0,0,0,0.12)")+";cursor:pointer;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px;'><span style='font-size:20px;'>🙂</span><span style='font-size:12px;color:"+(feels[day]=="soso"?"#786030":"#aaa")+";'>まあまあ</span></button>";
+  var f3="<button onclick=\"sf2('hmm')\" style='flex:1;padding:10px 4px;background:"+(feels[day]=="hmm"?"rgba(104,98,88,0.05)":"transparent")+";border:1px solid "+(feels[day]=="hmm"?"#686258":"rgba(0,0,0,0.12)")+";cursor:pointer;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px;'><span style='font-size:20px;'>😐</span><span style='font-size:12px;color:"+(feels[day]=="hmm"?"#686258":"#aaa")+";'>うーん</span></button>";
+
+  var sv="";
+  if(day==3){sv="<div style='padding:20px;background:#ede5d0;border-top:1px solid rgba(0,0,0,0.08);'><div style='font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:8px;'>SOUVENIR</div><div style='font-size:17px;font-weight:bold;color:#1c1810;line-height:1.8;margin-bottom:8px;'>あなたが本当にやりたかったことは、今もまだ、あなたの中にあるか。</div><div style='font-size:12px;color:#78705a;line-height:1.7;'>この問いに、すぐ答えなくていい。日常に戻ってから、少しだけ立ち止まってみよう。</div></div>";}
+
+  var h="";
+  h+="<div style='padding:18px 20px;border-bottom:1px solid rgba(0,0,0,0.08);'><div style='font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:6px;'>Day "+day+"</div><div style='font-size:19px;font-weight:bold;color:#1c1810;'>"+DATE[day]+"</div></div>";
+  h+="<div style='padding:18px 20px;background:#ede5d0;border-bottom:1px solid rgba(0,0,0,0.08);'><div style='font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:8px;'>今日の行程</div>"+s+"</div>";
+  h+="<div style='padding:18px 20px;border-bottom:1px solid rgba(0,0,0,0.08);'>";
+  h+="<div style='font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:8px;'>今日の問い</div>";
+  h+="<div style='font-size:20px;font-weight:bold;color:#1c1810;line-height:1.8;margin-bottom:16px;white-space:pre-line;'>"+Q[day]+"</div>";
+  h+="<textarea id='ta' rows='3' placeholder='思ったことを、そのまま…' style='width:100%;border:none;border-bottom:1px solid rgba(0,0,0,0.12);background:transparent;font-family:sans-serif;font-size:14px;color:#1c1810;line-height:1.8;resize:none;padding:4px 0 8px;outline:none;margin-bottom:14px;box-sizing:border-box;'></textarea>";
+
+h+=”<div style='font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:8px;'>手ごたえ</div>”;
+h+=”<div style='display:flex;gap:6px;margin-bottom:14px;'>”+f1+f2+f3+”</div>”;
+h+=”<button onclick='doRec()' style='width:100%;padding:14px;background:#385830;border:none;color:#fff;font-family:sans-serif;font-size:13px;letter-spacing:2px;cursor:pointer;'>記録して仲間に届ける</button></div>”;
+h+=”<div style='padding:18px 20px;'>”;
+h+=”<div style='display:flex;align-items:center;gap:10px;margin-bottom:14px;'><span style='font-size:10px;color:#aaa;letter-spacing:2px;'>仲間の記録</span><div style='flex:1;height:1px;background:rgba(0,0,0,0.1);'></div><button onclick='loadAll()' style='border:1px solid rgba(0,0,0,0.12);background:transparent;padding:4px 12px;font-size:11px;color:#aaa;cursor:pointer;font-family:sans-serif;'>更新</button></div>”;
+h+=”<div id='wa'>”+makeWave()+”</div>”;
+h+=”<div id='ca'>”+makeCards(allRows[day])+”</div></div>”;
+h+=sv;
+h+=”<div style='padding:18px 20px 40px;display:flex;justify-content:space-between;align-items:center;'><div style='font-size:11px;color:#aaa;line-height:1.7;'>失敗も後悔も、全部持ったまま、<br>旅に出よう。</div><div style='font-size:14px;font-weight:bold;color:#385830;'>たのしゅぎょ！</div></div>”;
+
+document.getElementById(“pg”).innerHTML=h;
+var ta=document.getElementById(“ta”);
+ta.value=answers[day]||””;
+ta.oninput=function(){answers[day]=this.value;try{localStorage.setItem(“yt_a”,JSON.stringify(answers));}catch(e){}};
+}
+
+function sf2(t){feels[day]=t;try{localStorage.setItem(“yt_f”,JSON.stringify(feels));}catch(e){}renderPage();}
+
+function doRec(){
+var nm=prompt(“あなたの名前”);
+if(!nm||!nm.trim()){return;}
+nm=nm.trim();
+var feel=feels[day]||””;
+var ans=answers[day]||””;
+if(!ans&&!feel){alert(“一言か手ごたえを入力してください”);return;}
+fetch(GAS+”?action=save&day=”+day+”&name=”+encodeURIComponent(nm)+”&feel=”+feel+”&ans=”+encodeURIComponent(ans),{method:“GET”,mode:“no-cors”})
+.then(function(){alert(“仲間に届いた！”);setTimeout(loadAll,1000);})
+.catch(function(){alert(“送信できませんでした”);});
+}
+
+function loadAll(){
+var done=0;
+function upd(){done++;if(done==3){var wa=document.getElementById(“wa”);var ca=document.getElementById(“ca”);if(wa){wa.innerHTML=makeWave();}if(ca){ca.innerHTML=makeCards(allRows[day]);}}}
+fetch(GAS+”?action=load&day=1”,{mode:“cors”}).then(function(r){return r.json();}).then(function(data){if(data.ok){allRows[1]=data.rows;}upd();}).catch(upd);
+fetch(GAS+”?action=load&day=2”,{mode:“cors”}).then(function(r){return r.json();}).then(function(data){if(data.ok){allRows[2]=data.rows;}upd();}).catch(upd);
+fetch(GAS+”?action=load&day=3”,{mode:“cors”}).then(function(r){return r.json();}).then(function(data){if(data.ok){allRows[3]=data.rows;}upd();}).catch(upd);
+}
+
+function makeWave(){
+var W=250,H=72;
+var DX={1:42,2:125,3:208};
+var names=[];
+for(var d=1;d<=3;d++){for(var i=0;i<allRows[d].length;i++){var n=allRows[d][i].name;if(n&&names.indexOf(n)<0){names.push(n);}}}
+if(!names.length){return “<div style='background:#ede5d0;border:1px solid rgba(0,0,0,0.1);padding:12px;margin-bottom:14px;'><div style='font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:8px;'>手ごたえの波 3日間</div><div style='text-align:center;padding:12px;font-size:12px;color:#ccc;'>更新を押すと表示されます</div></div>”;}
+var paths=””;
+paths+=”<line x1='0' y1='8' x2='"+W+"' y2='8' stroke='rgba(0,0,0,0.07)' stroke-dasharray='3,4'/>”;
+paths+=”<line x1='0' y1='36' x2='"+W+"' y2='36' stroke='rgba(0,0,0,0.07)' stroke-dasharray='3,4'/>”;
+paths+=”<line x1='0' y1='64' x2='"+W+"' y2='64' stroke='rgba(0,0,0,0.07)' stroke-dasharray='3,4'/>”;
+paths+=”<line x1='83' y1='0' x2='83' y2='"+H+"' stroke='rgba(0,0,0,0.1)'/>”;
+paths+=”<line x1='166' y1='0' x2='166' y2='"+H+"' stroke='rgba(0,0,0,0.1)'/>”;
+var legend=””;
+for(var ni=0;ni<names.length;ni++){
+var n=names[ni];
+var col=gc(n);
+var hx=col.replace(”#”,””);
+var rr=parseInt(hx.slice(0,2),16);
+var gg=parseInt(hx.slice(2,4),16);
+var bb=parseInt(hx.slice(4,6),16);
+var pts=[];
+for(var d=1;d<=3;d++){for(var i=0;i<allRows[d].length;i++){if(allRows[d][i].name==n&&allRows[d][i].feel){pts.push([DX[d],FY[allRows[d][i].feel]||36]);break;}}}
+if(!pts.length){continue;}
+legend+=”<span style='display:inline-flex;align-items:center;gap:4px;margin-right:8px;'><span style='width:8px;height:8px;border-radius:50%;background:"+col+";display:inline-block;'></span><span style='font-size:11px;color:#78705a;'>”+n+”</span></span>”;
+if(pts.length==1){
+paths+=”<circle cx='"+pts[0][0]+"' cy='"+pts[0][1]+"' r='5' fill='"+col+"'/>”;
+} else {
+var fl=“M”+pts[0][0]+” “+H+” L”+pts[0][0]+” “+pts[0][1];
+var ln=“M”+pts[0][0]+” “+pts[0][1];
+for(var i=1;i<pts.length;i++){var cx=(pts[i-1][0]+pts[i][0])/2;var cy=(pts[i-1][1]+pts[i][1])/2;fl+=” Q”+pts[i-1][0]+” “+pts[i-1][1]+” “+cx+” “+cy;ln+=” Q”+pts[i-1][0]+” “+pts[i-1][1]+” “+cx+” “+cy;}
+fl+=” L”+pts[pts.length-1][0]+” “+pts[pts.length-1][1]+” L”+pts[pts.length-1][0]+” “+H+” Z”;
+ln+=” L”+pts[pts.length-1][0]+” “+pts[pts.length-1][1];
+paths+=”<path d='"+fl+"' fill='rgba("+rr+","+gg+","+bb+",0.12)'/>”;
+paths+=”<path d='"+ln+"' fill='none' stroke='"+col+"' stroke-width='2' stroke-linejoin='round'/>”;
+for(var i=0;i<pts.length;i++){paths+=”<circle cx='"+pts[i][0]+"' cy='"+pts[i][1]+"' r='4' fill='"+col+"'/>”;}
+}
+}
+return “<div style='background:#ede5d0;border:1px solid rgba(0,0,0,0.1);padding:12px;margin-bottom:14px;'><div style='font-size:10px;color:#aaa;letter-spacing:2px;margin-bottom:8px;'>手ごたえの波 3日間</div><div style='display:flex;gap:6px;'><div style='display:flex;flex-direction:column;justify-content:space-between;font-size:14px;padding:2px 0;'><span>😊</span><span>🙂</span><span>😐</span></div><svg viewBox='0 0 "+W+" "+H+"' style='flex:1;height:"+H+"px;display:block;overflow:visible;'>”+paths+”</svg></div><div style='display:flex;justify-content:space-between;padding-left:28px;margin-top:4px;'><span style='font-size:10px;color:#aaa;'>4/19</span><span style='font-size:10px;color:#aaa;'>4/20</span><span style='font-size:10px;color:#aaa;'>4/21</span></div><div style='margin-top:8px;padding-left:28px;'>”+legend+”</div></div>”;
+}
+
+function makeCards(r){
+if(!r.length){return “<div style='text-align:center;padding:16px;font-size:12px;color:#ccc;'>まだ誰も記録していません</div>”;}
+var h=””;
+for(var i=0;i<r.length;i++){
+var x=r[i];var f=x.feel?FACE[x.feel]:”—”;
+h+=”<div style='padding:12px 14px;background:#ede5d0;border:1px solid rgba(0,0,0,0.1);margin-bottom:7px;'><div style='display:flex;align-items:center;gap:8px;margin-bottom:5px;'><div style='width:26px;height:26px;border-radius:50%;border:1px solid "+gc(x.name)+";display:flex;align-items:center;justify-content:center;font-size:13px;color:#46402e;flex-shrink:0;'>”+x.name.charAt(0)+”</div><span style='font-size:12px;color:#46402e;flex:1;'>”+x.name+”</span><span style='font-size:18px;'>”+f+”</span></div>”+(x.ans?”<div style='font-size:13px;color:#78705a;line-height:1.7;padding-left:34px;font-style:italic;'>”+x.ans+”</div>”:”<div style='font-size:11px;color:#ccc;padding-left:34px;'>手ごたえのみ記録</div>”)+”</div>”;
+}
+return h;
+}
 </script>
+
 </body>
 </html>
