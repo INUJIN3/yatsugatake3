@@ -10,15 +10,18 @@
 </div>
 <div id="pg" style="padding:20px;"></div>
 <script>
-var D={
-  1:{date:"4月19日",q:"この旅の中で、\n何を見つけたい？"},
-  2:{date:"4月20日",q:"ちょっと気づいたことは？"},
-  3:{date:"4月21日",q:"どんな変化をもたらしてくれそう？"}
-};
+var sch1=[["12:06","JR茅野駅 集合"],["12:15","さくらさく ランチ"],["午後","茅野市周辺 視察"],["15:30","池の平ホテル チェックイン"],["18:00","矢島社長と会食MTG"]];
 function goDay(d){
+  var s="";
+  for(var i=0;i<sch1.length;i++){
+    s+="<div style='display:flex;gap:10px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);'>"
+      +"<span style='font-size:11px;color:#aaa;width:42px;flex-shrink:0;'>"+sch1[i][0]+"</span>"
+      +"<span style='font-size:12px;color:#46402e;'>"+sch1[i][1]+"</span></div>";
+  }
   document.getElementById("pg").innerHTML=
-    "<div style='font-size:20px;font-weight:bold;color:#1c1810;margin-bottom:12px;'>"+D[d].date+"</div>"+
-    "<div style='font-size:18px;line-height:1.8;white-space:pre-line;color:#1c1810;'>"+D[d].q+"</div>";
+    "<div style='font-size:20px;font-weight:bold;color:#1c1810;margin-bottom:16px;'>4月19日（日）</div>"+
+    "<div style='background:#ede5d0;padding:12px;margin-bottom:16px;'>"+s+"</div>"+
+    "<div style='font-size:18px;font-weight:bold;color:#1c1810;line-height:1.8;white-space:pre-line;'>この旅の中で、\n何を見つけたい？</div>";
 }
 goDay(1);
 </script>
